@@ -1,0 +1,40 @@
+{
+  "scan_config": {
+    "max_file_size_mb": 10,
+    "timeout_seconds": 60,
+    "parallel_scans": 2,
+    "deep_analysis": false,
+    "recursive": true,
+    "file_extensions": [".js", ".ts", ".py"],
+    "exclude_patterns": ["node_modules", ".git", "dist", "build"]
+  },
+  "detection_rules": {
+    "sql_injection": {
+      "enabled": true,
+      "severity_threshold": "high"
+    },
+    "xss": {
+      "enabled": true,
+      "severity_threshold": "high"
+    },
+    "authentication": {
+      "enabled": true,
+      "check_hardcoded_secrets": true
+    }
+  },
+  "reporting": {
+    "include_poc": false,
+    "include_fix_suggestions": true,
+    "generate_attack_chains": false,
+    "export_formats": ["console", "json"],
+    "output_dir": "./scan_results/"
+  },
+  "ml_config": {
+    "confidence_threshold": 0.5,
+    "use_gpu": false
+  },
+  "logging": {
+    "level": "DEBUG",
+    "colored": true
+  }
+}

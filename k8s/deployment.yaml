@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: defensys-api
+  namespace: defensys
+  labels:
+    app: defensys-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: defensys-api
+  template:
+    metadata:
+      labels:
+        app: defensys-api
+    spec:
+      containers:
+      - name: defensys-api
+        image: defensys:latest
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: DEFENSYS_ENV
+          value: "production"
+        - name: LOG_LEVEL
+          value: "info"
+        - name: REDIS_URL
+          value: "redis://redis-service:6379"
+        - name: DATABASE_URL
+          value: "sqlite:///app/data/defensys.db"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: data-volume
+          mountPath: /app/data
+        - name: config-volume
+          mountPath: /app/config
+      volumes:
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: defensys-data-pvc
+      - name: config-volume
+        configMap:
+          name: defensys-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: defensys-api-service
+  namespace: defensys
+  labels:
+    app: defensys-api
+spec:
+  selector:
+    app: defensys-api
+  ports:
+  - port: 8000
+    targetPort: 8000
+    name: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: defensys-data-pvc
+  namespace: defensys
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

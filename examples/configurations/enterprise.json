@@ -1,0 +1,83 @@
+{
+  "scan_config": {
+    "max_file_size_mb": 50,
+    "timeout_seconds": 300,
+    "parallel_scans": 8,
+    "deep_analysis": true,
+    "recursive": true,
+    "file_extensions": [".js", ".ts", ".jsx", ".tsx", ".py", ".java", ".php", ".cs", ".go"],
+    "exclude_patterns": ["node_modules", ".git", "dist", "build", "coverage", "test", "tests"]
+  },
+  "detection_rules": {
+    "sql_injection": {
+      "enabled": true,
+      "severity_threshold": "medium",
+      "custom_patterns": [
+        "db\\.exec\\s*\\(\\s*[\"'].*?\\+",
+        "query\\s*\\(\\s*[\"'].*?\\$\\{.*?\\}"
+      ]
+    },
+    "xss": {
+      "enabled": true,
+      "severity_threshold": "high",
+      "check_dom_manipulation": true,
+      "check_template_injection": true
+    },
+    "authentication": {
+      "enabled": true,
+      "check_hardcoded_secrets": true,
+      "check_weak_tokens": true,
+      "jwt_secret_entropy_threshold": 128
+    },
+    "file_upload": {
+      "enabled": true,
+      "check_file_type_validation": true,
+      "check_content_validation": true
+    },
+    "cryptographic": {
+      "enabled": true,
+      "check_weak_algorithms": true,
+      "check_random_generation": true
+    }
+  },
+  "reporting": {
+    "include_poc": true,
+    "include_fix_suggestions": true,
+    "generate_attack_chains": true,
+    "export_formats": ["json", "html", "pdf"],
+    "output_dir": "./scan_results/",
+    "template_path": "./src/reports/templates/"
+  },
+  "integrations": {
+    "slack_webhook": "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK",
+    "jira_project": "SEC",
+    "email_notifications": true,
+    "webhook_url": "https://your-ci-system.com/webhook"
+  },
+  "ml_config": {
+    "model_path": "./data/models/",
+    "confidence_threshold": 0.7,
+    "use_gpu": false,
+    "batch_size": 32
+  },
+  "api_config": {
+    "host": "0.0.0.0",
+    "port": 8000,
+    "workers": 4,
+    "cors_origins": ["https://your-domain.com"],
+    "rate_limit": 100
+  },
+  "security": {
+    "secret_key": "your-256-bit-secret-key-here",
+    "jwt_secret": "your-jwt-secret-key-here",
+    "encryption_key": "your-encryption-key-here",
+    "session_timeout": 3600
+  },
+  "logging": {
+    "level": "INFO",
+    "log_dir": "./logs/",
+    "colored": false,
+    "max_file_size": 10485760,
+    "backup_count": 5
+  }
+}

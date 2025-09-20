@@ -1,0 +1,112 @@
+name: DefenSys Security Scan
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+    
+    - name: Install DefenSys
+      run: pip install -e .
+    
+    - name: Run DefenSys scan
+      id: scan
+      run: |
+        echo "🛡️ Running DefenSys security analysis..."
+        defensys ./src --format json -o security-results.json --recursive
+        defensys ./tests --format json -o test-security-results.json --recursive
+        defensys . --format html -o security-report.html --recursive
+        echo "scan_completed=true" >> $GITHUB_OUTPUT
+    
+    - name: Upload security results
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-results
+        path: |
+          security-results.json
+          test-security-results.json
+          security-report.html
+    
+    - name: Comment PR with results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const results = JSON.parse(fs.readFileSync('security-results.json', 'utf8'));
+          
+          const summary = results.summary;
+          const critical = summary.critical_count;
+          const high = summary.high_count;
+          const medium = summary.medium_count;
+          const low = summary.low_count;
+          
+          const comment = `## 🛡️ DefenSys Security Scan Results
+          
+          **Summary:**
+          - 🔴 Critical: ${critical}
+          - 🟠 High: ${high}
+          - 🟡 Medium: ${medium}
+          - 🟢 Low: ${low}
+          - 📊 Total: ${summary.total_vulnerabilities}
+          
+          ${critical > 0 || high > 0 ? '⚠️ **Action Required:** Critical or high severity vulnerabilities found!' : '✅ **No critical vulnerabilities found.**'}
+          
+          [View detailed report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+    
+    - name: Fail on critical vulnerabilities
+      if: contains(github.event.head_commit.message, '[skip-security-check]') == false
+      run: |
+        python -c "
+        import json
+        with open('security-results.json') as f:
+            results = json.load(f)
+        critical = results['summary']['critical_count']
+        high = results['summary']['high_count']
+        if critical > 0:
+            print(f'❌ Found {critical} critical vulnerabilities')
+            exit(1)
+        elif high > 0:
+            print(f'⚠️ Found {high} high severity vulnerabilities')
+            # Don't fail on high severity, just warn
+        else:
+            print('✅ No critical or high severity vulnerabilities found')
+        "

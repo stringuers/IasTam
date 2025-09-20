@@ -1,0 +1,134 @@
+{
+  "scan_config": {
+    "max_file_size_mb": 100,
+    "timeout_seconds": 600,
+    "parallel_scans": 16,
+    "deep_analysis": true,
+    "recursive": true,
+    "file_extensions": [".js", ".ts", ".jsx", ".tsx", ".py", ".java", ".php", ".cs", ".go", ".rb", ".swift", ".kt"],
+    "exclude_patterns": ["node_modules", ".git", "dist", "build", "coverage", "test", "tests", "docs"]
+  },
+  "detection_rules": {
+    "sql_injection": {
+      "enabled": true,
+      "severity_threshold": "low",
+      "custom_patterns": [
+        "db\\.exec\\s*\\(\\s*[\"'].*?\\+",
+        "query\\s*\\(\\s*[\"'].*?\\$\\{.*?\\}",
+        "execute\\s*\\(\\s*[\"'].*?\\+",
+        "raw\\s*\\(\\s*[\"'].*?\\+"
+      ]
+    },
+    "xss": {
+      "enabled": true,
+      "severity_threshold": "low",
+      "check_dom_manipulation": true,
+      "check_template_injection": true,
+      "check_react_vulnerabilities": true,
+      "check_vue_vulnerabilities": true
+    },
+    "authentication": {
+      "enabled": true,
+      "check_hardcoded_secrets": true,
+      "check_weak_tokens": true,
+      "check_password_policies": true,
+      "check_session_management": true,
+      "jwt_secret_entropy_threshold": 256
+    },
+    "file_upload": {
+      "enabled": true,
+      "check_file_type_validation": true,
+      "check_content_validation": true,
+      "check_path_traversal": true,
+      "check_malware_scanning": true
+    },
+    "cryptographic": {
+      "enabled": true,
+      "check_weak_algorithms": true,
+      "check_random_generation": true,
+      "check_key_management": true,
+      "check_certificate_validation": true
+    },
+    "injection": {
+      "enabled": true,
+      "check_command_injection": true,
+      "check_ldap_injection": true,
+      "check_xpath_injection": true,
+      "check_xxe": true
+    },
+    "configuration": {
+      "enabled": true,
+      "check_security_headers": true,
+      "check_cors_configuration": true,
+      "check_ssl_configuration": true,
+      "check_debug_mode": true
+    }
+  },
+  "reporting": {
+    "include_poc": true,
+    "include_fix_suggestions": true,
+    "include_remediation_steps": true,
+    "generate_attack_chains": true,
+    "generate_risk_assessment": true,
+    "export_formats": ["json", "html", "pdf", "sarif"],
+    "output_dir": "./scan_results/",
+    "template_path": "./src/reports/templates/",
+    "include_code_snippets": true,
+    "include_context_analysis": true
+  },
+  "integrations": {
+    "slack_webhook": "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK",
+    "jira_project": "SEC",
+    "email_notifications": true,
+    "webhook_url": "https://your-ci-system.com/webhook",
+    "splunk_integration": true,
+    "elasticsearch_integration": true
+  },
+  "ml_config": {
+    "model_path": "./data/models/",
+    "confidence_threshold": 0.6,
+    "use_gpu": true,
+    "batch_size": 64,
+    "ensemble_models": true,
+    "custom_models": ["./data/models/custom_classifier.pt"]
+  },
+  "api_config": {
+    "host": "0.0.0.0",
+    "port": 8000,
+    "workers": 8,
+    "cors_origins": ["https://your-domain.com", "https://admin.your-domain.com"],
+    "rate_limit": 50,
+    "authentication_required": true,
+    "ssl_enabled": true
+  },
+  "security": {
+    "secret_key": "your-512-bit-secret-key-here-must-be-very-long-and-random",
+    "jwt_secret": "your-jwt-secret-key-here-must-be-very-long-and-random",
+    "encryption_key": "your-encryption-key-here-must-be-very-long-and-random",
+    "session_timeout": 1800,
+    "max_login_attempts": 3,
+    "password_policy": {
+      "min_length": 12,
+      "require_uppercase": true,
+      "require_lowercase": true,
+      "require_numbers": true,
+      "require_special_chars": true
+    }
+  },
+  "logging": {
+    "level": "INFO",
+    "log_dir": "./logs/",
+    "colored": false,
+    "max_file_size": 52428800,
+    "backup_count": 10,
+    "audit_logging": true,
+    "security_logging": true
+  },
+  "compliance": {
+    "pci_dss": true,
+    "sox": true,
+    "gdpr": true,
+    "hipaa": true,
+    "iso27001": true
+  }
+}

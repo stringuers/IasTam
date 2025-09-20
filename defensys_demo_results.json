@@ -1,0 +1,54 @@
+{
+  "scan_metadata": {
+    "total_files": 4,
+    "total_vulnerabilities": 5,
+    "critical_count": 0,
+    "high_count": 3,
+    "medium_count": 2,
+    "low_count": 0,
+    "risk_score": 61,
+    "risk_level": "HIGH"
+  },
+  "vulnerabilities": [
+    {
+      "type": "Security Misconfiguration",
+      "severity": "Medium",
+      "line": 14,
+      "description": "Insecure configuration detected",
+      "code": "rejectUnauthorized: false",
+      "fix": "Review and secure configuration settings"
+    },
+    {
+      "type": "Security Misconfiguration",
+      "severity": "Medium",
+      "line": 18,
+      "description": "Insecure configuration detected",
+      "code": "process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';",
+      "fix": "Review and secure configuration settings"
+    },
+    {
+      "type": "Cross-Site Scripting (XSS)",
+      "severity": "High",
+      "line": 10,
+      "description": "Potential XSS vulnerability detected",
+      "code": "eval('alert(\"' + message + '\")');",
+      "fix": "Sanitize user input before rendering"
+    },
+    {
+      "type": "Cross-Site Scripting (XSS)",
+      "severity": "High",
+      "line": 15,
+      "description": "Potential XSS vulnerability detected",
+      "code": "document.write(\"<div>\" + content + \"</div>\");",
+      "fix": "Sanitize user input before rendering"
+    },
+    {
+      "type": "Cross-Site Scripting (XSS)",
+      "severity": "High",
+      "line": 21,
+      "description": "Potential XSS vulnerability detected",
+      "code": "<div dangerouslySetInnerHTML={{__html: user.bio}} />",
+      "fix": "Sanitize user input before rendering"
+    }
+  ]
+}
